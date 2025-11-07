@@ -50,7 +50,9 @@ Rails.application.configure do
   config.cache_store = :solid_cache_store
 
   # Use Sidekiq as the queue adapter for Active Job
-  config.active_job.queue_adapter = :sidekiq
+  # config.active_job.queue_adapter = :sidekiq
+  config.active_job.queue_adapter = :inline
+
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
