@@ -109,9 +109,6 @@ development:
   password: <%= ENV.fetch("POSTGRES_PASSWORD", "postgres") %>
   host: <%= ENV.fetch("POSTGRES_HOST", "localhost") %>
   port: 5432
-  cable:
-    <<: *default
-    database: zoho_whatsapp_api_development_cable
 
 test:
   <<: *default
@@ -120,26 +117,26 @@ test:
   password: <%= ENV.fetch("POSTGRES_PASSWORD", "postgres") %>
   host: <%= ENV.fetch("POSTGRES_HOST", "localhost") %>
   port: 5432
-  cable:
-    <<: *default
-    database: zoho_whatsapp_api_test_cable
 
 production:
   primary: &primary_production
     <<: *default
-    database: zoho_whatsapp_api_production
-    username: <%= ENV.fetch("POSTGRES_USER", "zoho_whatsapp_api") %>
-    password: <%= ENV.fetch("ZOHO_WHATSAPP_API_DATABASE_PASSWORD") %>
-    host: <%= ENV.fetch("POSTGRES_HOST", "localhost") %>
-    port: 5432
+    # Use DATABASE_URL provided by Render
+    url: <%= ENV['DATABASE_URL'] %>
+
+  # Optional cache DB (if you use Rails cache in a separate DB)
   cache:
     <<: *primary_production
     database: zoho_whatsapp_api_production_cache
     migrations_paths: db/cache_migrate
+
+  # Optional queue DB (for Active Job or Sidekiq-like jobs)
   queue:
     <<: *primary_production
     database: zoho_whatsapp_api_production_queue
     migrations_paths: db/queue_migrate
+
+  # Action Cable DB (if using Action Cable in separate connection)
   cable:
     <<: *primary_production
     database: zoho_whatsapp_api_production_cable
