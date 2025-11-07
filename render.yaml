@@ -1,116 +1,22 @@
+databases:
+  - name: mysite
+    databaseName: mysite
+    user: mysite
+    plan: free
+
 services:
-  # PostgreSQL Database
-  - type: pspg
-    name: zoho-whatsapp-db
-    plan: starter  # $7/month - change to 'free' for testing (90 days free)
-    databaseName: zoho_whatsapp_production
-    user: zoho_whatsapp_user
-
-  # Redis Instance
-  - type: redis
-    name: zoho-whatsapp-redis
-    plan: starter  # $10/month - change to 'free' for testing (25MB, 90 days)
-    maxmemoryPolicy: allkeys-lru
-    persistence: enabled
-
-  # Web Service (Puma)
   - type: web
     name: zoho-whatsapp-api
-    env: ruby
-    region: oregon  # Change to your preferred region
-    plan: starter  # $7/month - change to 'free' for testing (sleeps after 15min)
-    buildCommand: bundle install && bundle exec rails db:prepare
-    startCommand: bundle exec puma -C config/puma.rb
-    healthCheckPath: /up
+    runtime: ruby
+    plan: free
+    buildCommand: './bin/render-build.sh'
+    startCommand: 'bundle exec rails server'
     envVars:
-      - key: RAILS_ENV
-        value: production
-      - key: RAILS_MASTER_KEY
-        sync: false  # You'll need to set this manually in Render dashboard
       - key: DATABASE_URL
         fromDatabase:
-          name: zoho-whatsapp-db
+          name: mysite
           property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: zoho-whatsapp-redis
-          property: connectionString
-      # WhatsApp Configuration
-      - key: WHATSAPP_BASE_URL
-        sync: false  # Set manually: https://graph.facebook.com/v18.0
-      - key: WHATSAPP_SERVICE_NUMBER_ID
-        sync: false  # Set manually: Your WhatsApp Phone Number ID
-      - key: WHATSAPP_KEY
-        sync: false  # Set manually: Your WhatsApp Access Token
-      - key: WHATSAPP_VERIFY_TOKEN
-        sync: false  # Set manually: Your webhook verify token
-      # Zoho Configuration
-      - key: ZOHO_CLIENT_ID
-        sync: false  # Set manually: Your Zoho Client ID
-      - key: ZOHO_CLIENT_SECRET
-        sync: false  # Set manually: Your Zoho Client Secret
-      - key: ZOHO_REDIRECT_URI
-        sync: false  # Set manually: https://your-app-name.onrender.com/zoho/oauth_callback
-      - key: ZOHO_REFRESH_TOKEN
-        sync: false  # Set manually: Your Zoho Refresh Token
-      - key: ZOHO_OAUTH_BASE_URI
-        sync: false  # Set manually: https://accounts.zoho.com/oauth/v2/token (or your region)
-      - key: ZOHO_BASE_URI
-        sync: false  # Set manually: https://www.zohoapis.com (or your region)
-      # Optional: WhatsApp Template Names (if using custom template names)
-      # - key: WHATSAPP_TEMPLATE_UNDER_REVIEW_EN
-      #   sync: false
-      # - key: WHATSAPP_TEMPLATE_UNDER_REVIEW_FA
-      #   sync: false
-      # Add more template environment variables as needed
-
-  # Background Worker (Sidekiq)
-  - type: worker
-    name: zoho-whatsapp-sidekiq
-    env: ruby
-    region: oregon  # Should match web service region
-    plan: starter  # $7/month - change to 'free' for testing
-    buildCommand: bundle install
-    startCommand: bundle exec sidekiq -r ./config/environment.rb
-    envVars:
-      - key: RAILS_ENV
-        value: production
       - key: RAILS_MASTER_KEY
-        sync: false  # You'll need to set this manually in Render dashboard
-      - key: DATABASE_URL
-        fromDatabase:
-          name: zoho-whatsapp-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: zoho-whatsapp-redis
-          property: connectionString
-      # WhatsApp Configuration (same as web service)
-      - key: WHATSAPP_BASE_URL
         sync: false
-      - key: WHATSAPP_SERVICE_NUMBER_ID
-        sync: false
-      - key: WHATSAPP_KEY
-        sync: false
-      - key: WHATSAPP_VERIFY_TOKEN
-        sync: false
-      # Zoho Configuration (same as web service)
-      - key: ZOHO_CLIENT_ID
-        sync: false
-      - key: ZOHO_CLIENT_SECRET
-        sync: false
-      - key: ZOHO_REDIRECT_URI
-        sync: false
-      - key: ZOHO_REFRESH_TOKEN
-        sync: false
-      - key: ZOHO_OAUTH_BASE_URI
-        sync: false
-      - key: ZOHO_BASE_URI
-        sync: false
-      # Optional: WhatsApp Template Names (same as web service)
-      # - key: WHATSAPP_TEMPLATE_UNDER_REVIEW_EN
-      #   sync: false
-      # Add more template environment variables as needed
-
+      - key: WEB_CONCURRENCY
+        value: 2
