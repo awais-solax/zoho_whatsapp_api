@@ -1,3 +1,5 @@
+require "sidekiq/web"
+
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -5,10 +7,16 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # Sidekiq Web UI (mount in development/staging only, or protect with authentication)
+  mount Sidekiq::Web => "/sidekiq" if Rails.env.development?
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Zoho
+  get "zoho/oauth_callback", to: "zoho#oauth_callback"
+  post "zoho/webhook", to: "zoho#webhook"
+  get "zoho/fetch_records", to: "zoho#fetch_records"
+  post "zoho/create_record", to: "zoho#create_record"
+
+  # WhatsApp
+  post "/webhook/whatsapp", to: "whatsapp#receive"
+  get "/webhook/whatsapp", to: "whatsapp#verify"
 end
