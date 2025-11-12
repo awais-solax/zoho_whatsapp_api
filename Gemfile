@@ -51,7 +51,8 @@ end
 # Background job processing
 gem "sidekiq"
 gem "redis"
-gem "httparty"   
+gem "httparty"
+gem "phonelib"
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
@@ -59,8 +60,13 @@ group :test do
   gem "selenium-webdriver"
 
   gem "dotenv-rails", groups: [ :development, :test ]
-      # for Zoho API & WhatsApp
+  # for Zoho API & WhatsApp
 
   # RSpec for testing
   gem "rspec-rails"
 end
+
+
+
+
+

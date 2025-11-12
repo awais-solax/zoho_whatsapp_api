@@ -8,20 +8,43 @@ class SendWhatsappTemplateJob < ApplicationJob
   discard_on ArgumentError
 
   TEMPLATE_PARAMS = {
-    "application_stage_under_review" => %w[student_name id],
-    "application_stage_admission_confirmed" => %w[student_name id],
-    "application_stage_rejected" => %w[student_name id],
-    "application_stage_waitlisted" => %w[student_name id],
-    "application_stage_ineligible" => %w[student_name id],
-    "application_stage_committee_interview" => %w[student_name], # only 1 param
-    "application_stage_academic_interview" => %w[student_name id],
-    "application_stage_shortlisted" => %w[student_name id],
-    "application_status_update" => %w[student_name message_body]
+    en: {
+      "application_stage_under_review"          => %i[student_name id],
+      "application_stage_committee_interview"  => %i[student_name],
+      "application_stage_academic_interview"   => %i[student_name id],
+      "application_stage_shortlisted"          => %i[student_name id],
+      "application_stage_rejected"             => %i[student_name id],
+      "application_stage_waitlisted"           => %i[student_name id],
+      "application_stage_admission_confirmed"  => %i[student_name id],
+      "application_stage_ineligible"           => %i[student_name id],
+      "application_status_update"              => %i[student_name message_body]
+    },
+    fa: {  # Dari
+      "application_stage_under_review_fa"          => %i[student_name id],
+      "application_stage_committee_interview_fa"  => %i[student_name],
+      "application_stage_academic_interview_fa"   => %i[student_name id],
+      "application_stage_shortlisted_fa"          => %i[student_name id],
+      "application_stage_rejected_fa"             => %i[student_name id],
+      "application_stage_waitlisted_fa"           => %i[student_name id],
+      "application_stage_admission_confirmed_fa"  => %i[student_name id],
+      "application_stage_ineligible_fa"           => %i[student_name id]
+    },
+    ps_AF: {  # Pashto
+      "application_stage_under_review_ps"          => %i[student_name id],
+      "application_stage_committee_interview_ps"  => %i[student_name],
+      "application_stage_academic_interview_ps"   => %i[student_name id],
+      "application_stage_shortlisted_ps"          => %i[student_name id],
+      "application_stage_rejected_ps"             => %i[student_name id],
+      "application_stage_waitlisted_ps"           => %i[student_name id],
+      "application_stage_admission_confirmed_ps"  => %i[student_name id],
+      "application_stage_ineligible_ps"           => %i[student_name id]
+    }
   }.freeze
+
 
   def perform(template_name:, language:, components:, recipient_phone:)
     # Ensure only valid params are passed to the sender
-    filtered_components = filter_components(template_name, components)
+    filtered_components = filter_components(template_name, components, language)
 
     sender = WhatsappMessageSender.new(
       template_name: template_name,
@@ -41,10 +64,12 @@ class SendWhatsappTemplateJob < ApplicationJob
   private
 
   # Only keep parameters that belong to this template
-  def filter_components(template_name, components)
-    allowed_keys = TEMPLATE_PARAMS[template_name] || []
-    components.to_h.slice(*allowed_keys.map(&:to_sym))
+  def filter_components(template_name, components, language)
+    lang_key = language.to_s.downcase.to_sym
+    allowed_keys = TEMPLATE_PARAMS.dig(lang_key, template_name) || []
+    components.to_h.slice(*allowed_keys)
   end
+
 
   def retryable_error?(code)
     # Retry only for server or rate limit errors
