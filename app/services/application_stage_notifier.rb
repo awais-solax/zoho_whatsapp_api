@@ -78,7 +78,7 @@ class ApplicationStageNotifier
     when /pashto|پښتو|پشتو/
       %w[ps ps_AF]
     else
-      %w[en en]
+      %w[en en_US]
     end
   end
 
