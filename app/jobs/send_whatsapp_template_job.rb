@@ -29,7 +29,7 @@ class SendWhatsappTemplateJob < ApplicationJob
       "application_stage_admission_confirmed_fa"  => %i[student_name id],
       "application_stage_ineligible_fa"           => %i[student_name id]
     },
-    ps_AF: {  # Pashto
+    ps_af: {  # Pashto
       "application_stage_under_review_ps"          => %i[student_name id],
       "application_stage_committee_interview_ps"  => %i[student_name],
       "application_stage_academic_interview_ps"   => %i[student_name id],
